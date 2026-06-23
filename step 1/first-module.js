@@ -6,6 +6,7 @@ function subtract(a,b){
     return a-b;
 }
 
+
 function divide(a,b){
     if(b==0){
         throw new Error("Divide by zero is not allowed");
@@ -14,7 +15,5 @@ function divide(a,b){
 }
 
 module.exports = {
-    add,
-    subtract,
-    divide
+    add,subtract,divide
 }
