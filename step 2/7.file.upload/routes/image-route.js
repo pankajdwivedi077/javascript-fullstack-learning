@@ -1,5 +1,5 @@
 const express = require('express');
-const { uploadImage, fetchImage } = require('../controllers/image-controller');
+const { uploadImage, fetchImage, deleteImage } = require('../controllers/image-controller');
 const adminMiddleware = require('../middleware/admin-middleware')
 const authMiddleware = require('../middleware/auth-middleware')
 const uploadMiddleware = require('../middleware/upload-middleware')
@@ -11,5 +11,6 @@ router.post('/upload', authMiddleware, adminMiddleware, uploadMiddleware.single(
 
 // to get all the images
 router.get('/get', authMiddleware, fetchImage);
+router.delete('/delete/:id', authMiddleware, adminMiddleware ,deleteImage);
 
 module.exports = router;
