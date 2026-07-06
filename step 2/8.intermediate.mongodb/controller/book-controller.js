@@ -24,7 +24,7 @@ const createAuthor = async(req,res)=> {
 const createBook = async(req,res)=> {
     try{
      
-      const book = new Book(req.body);
+      const book = new Book(req.body); 
       await book.save();
 
       res.status(201).json({

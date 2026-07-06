@@ -62,7 +62,7 @@ const addNewBook = async(req, res) => {
         res.status(201).json({
             success: true,
             message: 'Book added',
-            data: newBookFormData 
+            data: newBookFormData  
         })
      }
   }catch(e){
