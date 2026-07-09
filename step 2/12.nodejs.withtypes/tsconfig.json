@@ -2,20 +2,16 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
-    "module": "nodenext",
+    "module": "nodenext", 
+    "moduleResolution": "nodenext", 
     "target": "esnext",
-    
-    // CHANGE THIS LINE 👇 (Remove the empty brackets and add "node")
     "types": ["node"], 
-    
     "lib": ["esnext"],
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
     "strict": true,
     "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
     "skipLibCheck": true
   }
 }
