@@ -12,6 +12,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "ioredis": "^5.11.1",
     "redis": "^4.7.0"
   }
 }
