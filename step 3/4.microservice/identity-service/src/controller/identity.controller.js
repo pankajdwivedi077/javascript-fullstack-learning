@@ -8,6 +8,10 @@ const registerUser = async(req,res)=> {
 
     logger.info("Registraction endpoint hit");
 
+     try{
+       // validate the schema
+  
+
     const {error} = validateRegistration(req.body);
 
     if(error){
@@ -37,12 +41,19 @@ const registerUser = async(req,res)=> {
 
     const { accessToken, refreshToken } = await generateToken(user);
 
-    
-
-    try{
-       // validate the schema
-    }catch(e){
-
+    res.status(201).json({
+        success: true,
+        message: "User register successfully",
+        accessToken,
+        refreshToken
+    })
+    }
+   catch(e){
+        logger.error("Registration error occured ", e);
+        res.status(500).json({
+            success: false,
+            message: "Internal server on register user"
+        })
     }
 }
 
@@ -51,3 +62,5 @@ const registerUser = async(req,res)=> {
 // refresh token
 
 // user logout
+
+module.exports = { registerUser };
