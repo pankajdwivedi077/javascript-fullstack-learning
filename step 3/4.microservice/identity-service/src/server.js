@@ -80,7 +80,7 @@ app.use("/api/auth", identityRouter);
 
 app.use(errorHandler);
 
-app.listen(PORT, (req, res) => {
+app.listen(PORT, () => {
     logger.info(`Identity server is running on ${PORT}`);
     console.log(`Identity server is running on ${PORT}`);
 })
@@ -89,4 +89,4 @@ app.listen(PORT, (req, res) => {
 
 process.on("unhandledRejection", (reason, promise)=> {
     logger.error('Unhandled rejection at ', promise, " reason", reason);
-})
+}) 
