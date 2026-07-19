@@ -9,6 +9,7 @@ const generateToken = async(user) => {
     username: user.username
   }, process.env.JWT_SECRET_KEY, {expiresIn: "15m"})
 
+
   const refreshToken = crypto.randomBytes(40).toString("hex");
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 7) // refresh token expires in 7 days
