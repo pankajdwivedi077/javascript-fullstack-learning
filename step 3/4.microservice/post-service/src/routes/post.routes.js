@@ -10,5 +10,7 @@ router.use(authenticateRequest);
 
 router.post("/create", createPost);
 router.get("/allposts", getAllPosts);
+router.get("/:id", getPost);
+router.delete("/:id", deletePost);
 
 module.exports = router;

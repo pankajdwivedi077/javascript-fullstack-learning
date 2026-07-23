@@ -2,6 +2,10 @@ const Post = require("../models/post");
 const logger = require("../utils/logger");
 
 async function invalidatePostCache(req, input){
+
+    const cachedKey = `post:${input}`
+    await req.redisClient.del(cachedKey);
+
     const keys = await req.redisClient.keys("posts:*");
     if(keys.length > 0){
         await req.redisClient.del(keys)
@@ -81,7 +85,7 @@ const getAllPosts = async(req,res)=> {
         JSON.stringify(result)
       )
 
-      res.staus(200).json({
+      res.status(200).json({
         success: true,
         data: result
       })
@@ -97,11 +101,42 @@ const getAllPosts = async(req,res)=> {
 
 const getPost = async(req,res)=> {
 
-     
+    logger.info("getPost end point hit");
 
     try{
 
+     const postId = req.params.id;
+
+     const cacheKey = `post:${postId}`
+     const cachedPost = await req.redisClient.get(cacheKey);
       
+      if(cachedPost){
+        return res.status(200).json({
+            success: true,
+            data: JSON.parse(cachedPost)
+        })
+      }
+
+      const singlePostById = await Post.findById(postId);
+
+      if(!singlePostById){
+        return res.status(404).json({
+            success: false,
+            message: "post not found"
+        })
+      }
+
+      // save your posts in redis cache
+      await req.redisClient.setex(
+        cacheKey,
+        300,
+        JSON.stringify(singlePostById)
+      )
+
+      res.status(200).json({
+        success: true,
+        data: singlePostById
+      })
 
     }catch(e){
         logger.error("Error fetching post ", e);
@@ -114,11 +149,28 @@ const getPost = async(req,res)=> {
 
 const deletePost = async(req,res)=> {
 
-     
+    logger.info("deletePost endPoint hit");
 
     try{
 
-      
+      const postId = await Post.findOneAndDelete({
+        _id: req.params.id,
+        user: req.user.userId
+      })
+
+      if(postId){
+        return res.status(404).json({
+            success: false,
+            message: "post not found"
+        })
+      }
+
+      await invalidatePostCache(req, req.params.id);
+
+      res.json({
+        success: true,
+        message: "Post deleted"
+      })
 
     }catch(e){
         logger.error("Error deleting post ", e);
