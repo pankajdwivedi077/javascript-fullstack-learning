@@ -95,15 +95,35 @@ app.use("/v1/posts", validateToken, proxy(process.env.POST_SERVICE_URL, {
         return proxyResData
     }
 }))
+
+// setting up proxy for mediaService
+app.use("/v1/media", validateToken, proxy(process.env.MEDIA_SERVICE_URL, {
+    ...proxyOptions,
+       proxyReqOptDecorator: (proxyReqOpts, srcReq)=> {
+        proxyReqOpts.headers["x-user-id"] = srcReq.user.userId;
+        if(!srcReq.headers["content-type"].startsWith("multipart/form-data")){
+            proxyReqOpts.headers['Content-Type']="application/json";
+        }
+        return proxyReqOpts
+    },
+    userResDecorator: (proxyRes, proxyResData, userReq, userRes)=> {
+        logger.info(`Response recieved from Media service: ${proxyRes.statusCode} `)
+        return proxyResData
+    },
+    parseReqBody: false
+}))
+
 app.use(errorHandler);
 
 app.listen(PORT, ()=> {
     logger.info(`Api gateway is ruuning on port:  ${PORT}`);
     logger.info(`IdentityService is ruuning on port: ${process.env.IDENTITY_SERVICE_URL}`);
     logger.info(`PostService is ruuning on port: ${process.env.POST_SERVICE_URL}`);
+    logger.info(`PostService is ruuning on port: ${process.env.MEDIA_SERVICE_URL}`);
     logger.info(`Redis url ${process.env.REDIS_UR}`)
     console.log(`Api gateway is ruuning on port:  ${PORT}`);
     console.log(`IdentityService is ruuning on port: ${process.env.IDENTITY_SERVICE_URL}`);
     console.log(`PostService is ruuning on port: ${process.env.POST_SERVICE_URL}`);
+    console.log(`MediaService is ruuning on port: ${process.env.MEDIA_SERVICE_URL}`);
 
 })
