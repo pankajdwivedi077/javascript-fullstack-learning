@@ -10,6 +10,8 @@ const helmet = require("helmet");
 const cors = require("cors");
 const mediaRouter = require("./routes/media.routes");
 const errorHandler = require("./middleware/errorHandler");
+const { connectRabbitMQ, consumeEvent } = require('./utils/rabbitmq');
+const { handlePostDeleted } = require('./eventHandler/media.event.handler');
 
 const app = express();
 
@@ -36,9 +38,23 @@ app.use("/api/media", mediaRouter);
 
 app.use(errorHandler);
 
-app.listen(PORT, ()=> {
-    logger.info(`Post serice running on port ${PORT}`);
-})
+async function startServer(){
+    try{
+       await connectRabbitMQ();
+
+       // consume all the event
+       await consumeEvent("post.deleted", handlePostDeleted);
+
+       app.listen(PORT, ()=> {
+            logger.info(`Media serice running on port ${PORT}`);
+       })
+    }catch(error){
+        logger.error("failed to connect to server ", error);
+        process.exit(1);
+    }
+}
+
+startServer();
 
 // unhandled promise rejection
 
