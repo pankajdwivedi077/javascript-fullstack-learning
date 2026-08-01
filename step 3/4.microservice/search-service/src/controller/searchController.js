@@ -1,5 +1,6 @@
 const Search = require("../models/search");
 const logger = require("../utils/logger");
+const { consumeEvent } = require("../utils/rabbitmq");
 
 const searchPostController = async(req,res)=>{
     logger.info("search endpoint hit");

@@ -11,7 +11,8 @@ const cors = require("cors");
 const router = require("./routes/searchRoutes");
 const Redis = require("ioredis");
 const errorHandler = require("./middleware/errorHandler");
-const { connectRabbitMQ, consumeEvent } = require("./utils/rabbitmq")
+const { connectRabbitMQ, consumeEvent } = require("./utils/rabbitmq");
+const { handlerPostCreated, handlerPostDeleted } = require('./event-handler/searchEventHandler');
 
 const app = express();
 
@@ -40,6 +41,25 @@ app.use("/api/search",router);
 app.use(errorHandler);
 
 // server
+async function startServer(){
+  try{
+
+    await connectRabbitMQ();
+
+    // consume the evnets / subscribe the event
+    await consumeEvent("post.created", handlerPostCreated);
+    await consumeEvent("post.deleted", handlerPostDeleted);
+
+    app.listen(PORT, ()=> {
+      logger.info(`SearchService running on port: ${PORT}`);
+    })
+
+  }catch(e){
+    logger.error("failed to start search service")
+  }
+}
+
+startServer();
 
 // unhandled promise rejection
 
