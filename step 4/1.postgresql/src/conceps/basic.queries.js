@@ -87,4 +87,4 @@ async function deleteUser(id){
   }
 }
 
-module.exports = { createUserTable, insertUser, getUsers, updateUserEmail, deleteUser };
+module.exports = { createUserTable, insertUser, getUsers, updateUserEmail, deleteUser }; 

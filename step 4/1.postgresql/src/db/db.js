@@ -3,7 +3,7 @@ require("dotenv").config();
 const { Pool } = require("pg");
 
 // create a new pool instance to manage database connections
-// postgress -> : // -> [user] => [password] -> @ -> host:port -> [database]
+// postgress -> : // -> [user] => [password] -> @ -> host:port -> [database] 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL
 })
