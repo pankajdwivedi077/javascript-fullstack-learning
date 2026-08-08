@@ -1,5 +1,7 @@
 const { getUsersWhere, getSortedUsers, getPagination } = require("./conceps/2.filtering.sorting");
 const { createPostTable, insert } = require("./conceps/3.relationship");
+const { getUsersWithPosts, leftJoin } = require("./conceps/4.joins");
+const { countPostsByUser, averagePerUser } = require("./conceps/5.aggregation");
 const { createUserTable, insertUser, getUsers, updateUserEmail, deleteUser } = require("./conceps/basic.queries");
 
 // test basic query
@@ -57,13 +59,49 @@ async function testRelationshipQ(){
     }
 }
 
+async function testJoins(){
+
+    try{
+
+    //   const res = await getUsersWithPosts();
+    //   console.log(res);
+
+      const res = await leftJoin();
+      console.log(res);
+
+    }catch(e){
+        console.error("error ",e)
+    }
+}
+
+async function testAggregate(){
+
+  try{
+
+    //  const res = await countPostsByUser();
+    //  console.log(res);
+
+     const res = await averagePerUser();
+     console.log(res);
+
+
+
+  }catch(e){
+    console.error(e);
+  }
+}
+
 async function runAllQueries(){
 
     // await testBasicQueries()
 
     // await testFilterAndSortQueries()
 
-    await testRelationshipQ()
+  //  await testRelationshipQ()
+
+ //     await testJoins()
+
+ await testAggregate()
 
 }
 
