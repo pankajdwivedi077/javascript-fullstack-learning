@@ -9,6 +9,8 @@ import * as joi from "joi";
 import appConfig from './config/app.config';
 import { TypeOrmModule } from "@nestjs/typeorm"
 import { Post } from './post/entities/post.entity';
+import { AuthModule } from './auth/auth.module';
+import { User } from './auth/entities/user.entity';
 
 // root module -> use all the sub module
 
@@ -21,10 +23,10 @@ import { Post } from './post/entities/post.entity';
       username: "postgres",
       password: "root",
       database: "step3nestjs",
-      entities: [Post],
+      entities: [Post, User],
       synchronize: true // only in developement
     }),  
-    PostModule],
+    PostModule, AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })
