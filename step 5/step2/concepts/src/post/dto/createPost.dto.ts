@@ -13,10 +13,6 @@ export class CreatePostDto {
    @MinLength(3, {message: "title must be atleast 5 character long"})
    content!: string
 
-   @IsNotEmpty({message: "Title is required"})
-   @IsString({message: "title must be string"})
-   @MinLength(3, {message: "title must be atleast 5 character long"})
-    @MaxLength(25, {message: "title can not be longer than 50 characters"})
-   authorName!: string
+   
    
 }
