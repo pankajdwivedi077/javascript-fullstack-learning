@@ -72,12 +72,38 @@ export class PostService {
     return singlePost;
    }
 
+   async findOne2(id: number): Promise<Post>{
+
+    const cacheKey = `post_${id}`
+    const cachedPost = await this.cacheManger.get<Post>(cacheKey)
+
+    if(cachedPost){
+      console.log(`cache hit ${cacheKey}`)
+      return cachedPost;
+    }
+    
+    console.log(`cache miss`)
+
+    const singlePost = await this.postRepository.findOne({
+      where: {id},
+      relations: { authorName: true }
+    });
+    if(!singlePost){
+        throw new NotFoundException(`Post with id ${id} is not present`);
+    }
+    // store the post to cache
+    await this.cacheManger.set(cacheKey, singlePost, 30000)
+    return singlePost;
+   }
+
    async create(createPostData: CreatePostDto, authorName: User): Promise<Post>{
     const newPost = this.postRepository.create({
       title: createPostData.title,
       content: createPostData.content,
       authorName
     })
+    // invalidate the existing cache
+    await this.invalidateAllExistingCache()
     return this.postRepository.save(newPost);
    }
 
@@ -93,12 +119,30 @@ export class PostService {
        findPostToUpdate.content = updatePostData.content
      }
     
+      // invalidate the existing cache
+     const updatedPost = await this.postRepository.save(findPostToUpdate);
+     await this.cacheManger.del(`post_${id}`)
+   
+    await this.invalidateAllExistingCache()
+
      return this.postRepository.save(findPostToUpdate);
    }
 
   async deletePost(id: number): Promise<void>{
        const findPostToDelete = await this.findOne(id);
        await this.postRepository.remove(findPostToDelete);
+         // invalidate the existing cache
+       await this.cacheManger.del(`post_${id}`)
+      
+         await this.invalidateAllExistingCache()
+   }
+
+   private async invalidateAllExistingCache(): Promise<void>{
+     console.log(`invalidating ${this.postListCacheKeys.size} list cache entries`)
+     for(const key of this.postListCacheKeys){
+      await this.cacheManger.del(key)
+     }
+     this.postListCacheKeys.clear()
    }
 
 }

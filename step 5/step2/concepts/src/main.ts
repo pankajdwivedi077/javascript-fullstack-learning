@@ -1,12 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
+import { LoginInterceptor } from './common/interceptors/login.interceptors';
 
 // entry point of nestjs application
 
 async function bootstrap() {
 
-  const app = await NestFactory.create(AppModule);
+  const logger = new Logger("Bootstrap")
+
+  const app = await NestFactory.create(AppModule, {
+    logger: ["error", "warn", "log"]
+  });
 
   // global settings
   // env
@@ -22,6 +27,8 @@ async function bootstrap() {
   // )
 
   // starts a http server
+
+  app.useGlobalInterceptors(new LoginInterceptor())
 
   await app.listen(process.env.PORT ?? 3000);
 }
