@@ -1,0 +1,33 @@
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "@better-auth/drizzle-adapter";
+import { db } from "./db";
+import { user, session, account, verification } from "./db/schema";
+import { admin } from "better-auth/plugins";
+import { nextCookies } from "better-auth/next-js";
+
+const adminRole = "admin";
+const userRole = "user";
+
+export const auth = betterAuth({
+  baseURL: process.env.BETTER_AUTH_URL,
+  database: drizzleAdapter(db, {
+    provider: "pg",
+    schema: { user, session, account, verification },
+  }),
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET_KEY as string,
+      mapProfileToUser: (profile) => ({
+        name: profile.name,
+        email: profile.email,
+        image: profile.picture,
+        role: userRole,
+      }),
+    },
+  },
+  plugins: [
+    admin({ adminRoles: [adminRole], defaultRole: userRole }),
+    nextCookies(),
+  ],
+});

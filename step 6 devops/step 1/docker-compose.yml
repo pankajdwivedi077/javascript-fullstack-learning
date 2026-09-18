@@ -1,0 +1,12 @@
+
+services:
+  backend:
+    build: ./server
+    container_name: backend
+    restart: always
+    env_file:
+     - ./server/.env
+    port:
+      - "5000:5000"
+
+ 
