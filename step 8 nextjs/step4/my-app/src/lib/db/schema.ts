@@ -102,13 +102,58 @@ export const asset = pgTable("asset", {
       .notNull(),
 })
 
+export const payment = pgTable("payment", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  amount: integer("amount").notNull(),
+  currency: text("currency").default("USD").notNull(),
+  status: text("status").notNull(),
+  provider: text("provider").notNull(),
+  providerId: text("provider_id"),
+  userId: text("user_id").notNull().references(()=>user.id),
+   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+})
+
+export const purchase = pgTable("purchase", {
+   id: uuid("id").defaultRandom().primaryKey(),
+   assetId: uuid("asset_id").notNull().references(()=>asset.id, {onDelete: "restrict"}),
+   userId: text("user_id").notNull().references(()=>user.id, {onDelete: "cascade"}),
+   paymentId: uuid("payment_id").notNull().references(()=> payment.id),
+   price: integer("price").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  
+})
+
+export const invoice = pgTable("invoice", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  invoiceNumber: text("invoice_number").notNull().unique(),
+  purchaseId: uuid("purchase_id").notNull().references(()=>purchase.id, {onDelete:"cascade"}),
+  userId: text("user_id").notNull().references(()=>user.id, {onDelete: "cascade"}),
+  amount: integer("amount").notNull(),
+  currency: text("currency").default("USD").notNull(),
+  status: text("status").notNull(),
+  htmlContent: text("html_content"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+})
+
 export const authRelations = defineRelations(
-  { user, session, account, verification, category, asset },
+  { user, session, account, verification, category, asset, payment, purchase, invoice },
   (r) => ({
     user: {
       sessions: r.many.session({ from: r.user.id, to: r.session.userId }),
       accounts: r.many.account({ from: r.user.id, to: r.account.userId }),
       assets: r.many.asset({ from: r.user.id, to: r.asset.userId }),
+      payment: r.many.payment({ from: r.user.id, to: r.payment.userId }),
+      purchase: r.many.purchase({ from: r.user.id, to: r.purchase.userId }),
+      invoice: r.many.invoice({ from: r.user.id, to: r.invoice.userId }),
     },
     session: {
       user: r.one.user({ from: r.session.userId, to: r.user.id }),
@@ -122,6 +167,21 @@ export const authRelations = defineRelations(
     asset: {
       user: r.one.user({ from: r.asset.userId, to: r.user.id }),
       category: r.one.category({ from: r.asset.categoryId, to: r.category.id }),
+      purchase: r.many.purchase({ from: r.asset.id, to: r.purchase.assetId })
     },
+    payment: {
+        user: r.one.user({ from: r.payment.userId, to: r.user.id }),
+        purchase: r.one.purchase({ from: r.payment.id, to: r.purchase.paymentId })
+    },
+    purchase: {
+        user: r.one.user({ from: r.purchase.userId, to: r.user.id }),
+        asset: r.one.asset({ from: r.purchase.assetId, to: r.asset.id }),
+        payment: r.one.payment({ from: r.purchase.paymentId, to: r.payment.id }),
+        invoice: r.one.invoice({ from: r.purchase.id, to: r.invoice.purchaseId })
+    },
+    invoice: {
+       user: r.one.user({ from: r.invoice.userId, to: r.user.id }),
+       purchase: r.one.purchase({ from: r.invoice.purchaseId, to: r.purchase.id })
+    }
   }),
 );

@@ -8,6 +8,7 @@ import { Label } from "../ui/label"
 import { Input } from "../ui/input"
 import { Textarea } from "../ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
+import { uploadAsset } from "@/actions/dashboard-actions"
 
 type Category ={
     id: number;
@@ -20,6 +21,12 @@ type FormState ={
   description: string;
   categoryId: string;
   file: File | null
+}
+
+type CloudinarySignature = {
+    signature: string;
+    timestamp: number;
+    apiKey: string;
 }
 
 interface UploadDialogProps{
@@ -57,6 +64,88 @@ export default function UploadAssert({categories}: UploadDialogProps){
    }
 }
 
+   async function getCloudinarySignature():Promise<CloudinarySignature>{
+      const timestamp = Math.round(new Date().getTime()/1000);
+      const response = await fetch("/api/cloudinary/signature", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({timestamp})
+      })
+      if(!response.ok){
+        throw new Error("Failed to create cloudinary signature")
+      }
+      return response.json();
+   }
+
+    const handleSubmit = async(e: React.FormEvent)=>{
+       e.preventDefault()
+       setIsUploading(true)
+       setUploadProgressStatus(0)
+       try {
+        const {signature, apiKey, timestamp} = await getCloudinarySignature();
+        
+         const cloudinaryData = new FormData();
+         cloudinaryData.append('file', formState.file as File)
+         cloudinaryData.append('api_key', apiKey)
+         cloudinaryData.append('timestamp', timestamp.toString())
+         cloudinaryData.append('signature', signature)
+         cloudinaryData.append('folder', 'next-course-asset-manager')
+
+         const xhr = new XMLHttpRequest()
+         xhr.open('POST', `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/auto/upload`);
+
+         xhr.upload.onprogress = (event)=> {
+            if(event.lengthComputable){
+                const progress = Math.round((event.loaded/event.total)*100)
+                setUploadProgressStatus(progress)
+            }
+         }
+
+         const cloudinaryPromise = new Promise<any>((resolve,reject)=>{
+            xhr.onload = ()=> {
+                if(xhr.status >= 200 && xhr.status < 300){
+                    const response = JSON.parse(xhr.responseText)
+                    resolve(response)
+                }else{
+                    reject(new Error('Upload to cloudinary failed'))
+                }
+            }
+            xhr.onerror = ()=> reject(new Error('Upload to cloudinary failed'))
+         })
+
+         xhr.send(cloudinaryData);
+         const cloudinaryResponse = await cloudinaryPromise;
+         const formData = new FormData()
+         formData.append('title', formState.title)
+         formData.append('description', formState.description)
+         formData.append('categoryId', formState.categoryId)
+         formData.append('fileUrl', cloudinaryResponse.secure_url)
+         formData.append('thumbnailUrl', cloudinaryResponse.secure_url)
+
+         // upload it to db
+          const result = await uploadAsset(formData);
+          if(result.success){
+            setOpen(false)
+            setFormState({
+                 title: "",
+    description: "",
+    categoryId: "",
+    file: null
+            })
+          }else{
+            throw new Error(result.error)
+          }
+
+       } catch (error) {
+        console.log(error)
+       }finally{
+        setIsUploading(false)
+        setUploadProgressStatus(0)
+       }
+    }
+
     return (
         <Dialog open={open} onOpenChange={setOpen} >
             <DialogTrigger >
@@ -70,7 +159,7 @@ export default function UploadAssert({categories}: UploadDialogProps){
                     <DialogTitle>Upload New Asset</DialogTitle>
                   
                 </DialogHeader>
-                <form className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-5">
                    <div className="space-y-2">
                     <Label htmlFor="title">Title</Label>
                     <Input
@@ -117,7 +206,15 @@ export default function UploadAssert({categories}: UploadDialogProps){
                      onChange={handleFileChange}
                     />
                    </div>
-                     <DialogFooter>
+                   {
+                    isUploading && uploadProgressStatus > 0 && (
+                        <div className="mb-5 w-full bg-stone-100 rounded-full h-2">
+                            <div className="bg-teal-500 h-2 rounded-full" style={{width: `${uploadProgressStatus}%`}} ></div>
+                            <p className="text-xs text-slate-500 mt-2 text-right">{uploadProgressStatus}% upload</p>
+                        </div>
+                    )
+                   }
+                     <DialogFooter className="mt-6">
                 <Button type="submit">
                     <Upload className="mr-2 h-5 w-5" />
                     Upload Asset
