@@ -33,11 +33,11 @@ type Count = { // index signature
     [k: string]: number
 }
 
-type Count1 = Record<"likes" | "views", number>
-
-const coun1: Count = {
-    "whatever": 1
+const count: Count = {
+    "whatever": 1   // ✅ fine — "whatever" is a string key, 1 is a number
 }
+
+type Count1 = Record<"likes" | "views", number>
 
 const count2: Count1 = {
     likes: 1,
