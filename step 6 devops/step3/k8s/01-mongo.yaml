@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: mongo
+  namespace: devops-part3
+  labels:
+    app: mongo
+spec:
+  replicase:1
+  selector:
+    matchLables:
+      app: mongo    
+  template:
+    metadata:
+      labels:
+        app: mongo    
