@@ -1,0 +1,18 @@
+advanceddevopscourse.duckdns.org {
+  encode gzip
+  
+
+  handle /api/* {
+    reverse_proxy server:5000
+  }
+
+  handle {
+    reverse_proxy web:5173
+  }
+}
+
+
+statusadvanceddevopscourse.duckdns.org {
+  encode gzip
+  reverse_proxy uptime-kuma:3001
+}

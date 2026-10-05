@@ -1,16 +1,43 @@
 apiVersion: apps/v1
 kind: Deployment
-metadata: 
+metadata:
   name: mongo
   namespace: devops-part3
   labels:
     app: mongo
 spec:
-  replicase:1
+  replicas: 1
   selector:
-    matchLables:
-      app: mongo    
+    matchLabels:
+      app: mongo
   template:
     metadata:
       labels:
-        app: mongo    
+        app: mongo
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:6.0
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+      volumes:
+        - name: mongo-data
+          # emptyDir: {}
+          PersistentVolumeClaim:
+            claimName: mongo-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  namespace: devops-part3
+spec:
+  selector:
+    app: mongo
+  ports:
+    - port: 27017
+      targetPort: 27017
+  type: ClusterIP
