@@ -1,9 +1,11 @@
-import { connectToDb } from "./config/db";
 import dotenv from "dotenv";
+dotenv.config();
+
+import { connectToDb } from "./config/db";
 import http from "http"
 import app from "./app";
 
-dotenv.config();
+
 
 async function startServer(){
     await connectToDb();

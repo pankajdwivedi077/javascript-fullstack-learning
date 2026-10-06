@@ -14,11 +14,12 @@ const userSchema = new Schema({
     },
     role: {
         type: String,
-        enum: ['user', 'admin']
+        enum: ['user', 'admin'],
+        default: 'user'
     },
     isEmailVerified: {
         type: Boolean,
-        default: true
+        default: false
     },
     name: {
         type: String
