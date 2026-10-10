@@ -13,6 +13,14 @@ export function createAccessToken(userId: string, role: 'user' | 'admin', tokenV
     })
 }
 
+export function verifyAccessToken(token:string){
+  return jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as {
+    sub: string;
+    role: 'user' | 'admin';
+    tokenVerison: number;
+  }
+}
+
 export function createRefreshToken(userId: string, tokenVersion: number){
 
     const payload = {

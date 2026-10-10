@@ -9,4 +9,5 @@ export const registerSchema = z.object({
 export const loginSchema = z.object({
     email: z.email(),
     password: z.string().min(4, {error: "Minimum 4 Character"}),
+    twoFactorCode: z.string().optional()
 })
