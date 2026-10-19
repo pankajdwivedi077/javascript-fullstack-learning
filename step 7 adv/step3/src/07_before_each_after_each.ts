@@ -10,6 +10,7 @@ export function addLesson(title: string): void {
 
 export function getLessons(): string[] {
   return [...savedLessons];
+  // return savedLessons;
 }
 
 export function getLessonCount(): number {

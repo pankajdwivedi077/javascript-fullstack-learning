@@ -5,7 +5,10 @@ import App4 from './components/App4'
 import App5 from './components/App5'
 import App6 from './components/App6'
 import App7 from './components/App7'
+import App8 from './components/App8'
 import Clock from './components/Clock'
+import Form from './components/Form'
+import ZodForm from './components/ZodForm'
 
 function App() {
   
@@ -21,7 +24,10 @@ function App() {
       {/* <App4 /> */}
       {/* <App5 /> */}
       {/* <App6 /> */}
-      <App7 />
+      {/* <App7 /> */}
+      {/* <Form /> */}
+      {/* <ZodForm /> */}
+      <App8 />
     </div>
 
   )
