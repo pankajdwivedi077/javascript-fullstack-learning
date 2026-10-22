@@ -1,9 +1,12 @@
 import { ChatGoogle } from "@langchain/google/node"
 import { ChatPromptTemplate } from "@langchain/core/prompts"
+import { RecommendationSchema } from "../schema/movie.schema";
 
 const model = new ChatGoogle({
-    model: "gemini-2.5-flash",
-    temperature: 0.3 // lower the temp more consistent less random answers
+    model: "gemini-3.8-flash",
+    temperature: 0.3, // lower the temp more consistent less random answers
+    apiKey: process.env.GOOGLE_API_KEY,
+    platformType: "gai",
 })
 
 const promptTemplate = ChatPromptTemplate.fromMessages([
@@ -56,4 +59,27 @@ export async function getRecommendations(input: {
 
     return response.text;
 
+}
+
+// zod + structured output
+const strcutureModel = model.withStructuredOutput(RecommendationSchema)
+
+export async function getStructuredRecommendations(input: {
+    userPrompt: string;
+    genre: string;
+    mood: string;
+    count: number;
+}) {
+    const chain = promptTemplate.pipe(strcutureModel)
+
+    const result = await chain.invoke({
+        userPrompt: input.userPrompt,
+        genre: input.genre,
+        mood: input.mood,
+        count: input.count
+    })
+
+    console.log(result)
+
+    return result;
 }

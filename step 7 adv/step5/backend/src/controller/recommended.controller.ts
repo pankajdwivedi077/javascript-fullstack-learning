@@ -1,4 +1,5 @@
 import { Request, Response } from "express"
+import { getRecommendations, getStructuredRecommendations } from "../service/langchain.service";
 
 export async function recommendMovies(req: Request, res: Response){
     
@@ -9,9 +10,14 @@ export async function recommendMovies(req: Request, res: Response){
                count = 2
          } = req.body;
 
-         
+        //  const result = await getRecommendations({userPrompt, genre, mood, count: Number(count)});
 
-    }catch{
+         const result = await getStructuredRecommendations({userPrompt, genre, mood, count: Number(count)});
 
+         res.json(result)
+
+    }catch(error){
+      console.log(error)
+      res.status(500).json({error: 'Something goes wrong'})
     }
 }
